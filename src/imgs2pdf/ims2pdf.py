@@ -1,11 +1,29 @@
+import itertools
 import os
+import sys
 from pathlib import Path
-from reportlab.pdfgen import canvas
-from reportlab.lib import pagesizes
-import click
 
+import click
+from reportlab.lib import pagesizes
+from reportlab.pdfgen import canvas
 
 ARG_SIZE_ERROR_MSG = 'The -size option accepts paper sizes such as A4 and B3, or comma-separated data such as 640,480.'
+
+
+class Spinner:
+    def __init__(self):
+        self.bars = itertools.cycle(['-', '/', '|', '\\'])
+        self.dots1 = itertools.cycle(['⣷', '⣯', '⣟', '⡿', '⢿', '⣻', '⣽', '⣾'])
+        self.dots2 = itertools.cycle(['⣷⣿', '⣿⣾', '⣿⣷', '⣿⣯', '⣿⣟', '⣿⡿', '⣿⢿', '⡿⣿', '⢿⣿', '⣻⣿', '⣽⣿', '⣾⣿'])
+
+    def next_bar(self):
+        return next(self.bars)
+
+    def next_dots1(self):
+        return next(self.dots1)
+
+    def next_dots2(self):
+        return next(self.dots2)
 
 
 def size_option2tuple(size):
@@ -85,9 +103,11 @@ def export(input_path, output_path, extension, papersize, title, author, subject
     pdf = canvas.Canvas(output_path)
     pdf = init_canvas(pdf, papersize, title, author, subject)
     print(f'target:  {input_path}')
+    spiner = Spinner()
     for i, p in enumerate(sorted(pl)):
         image_filename = str(p)
-        print(f'\rcurrent: {image_filename}', end='')
+        # print(f'\rcurrent: {image_filename}', end='')
+        print(f'\r{spiner.next_dots1()}  {image_filename}', end='')
         image_offset_x = 0
         image_offset_y = 0
         pdf.drawImage(
